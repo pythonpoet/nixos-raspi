@@ -35,7 +35,23 @@
 
   outputs = { self, nixpkgs
             , nixos-raspberrypi, disko
-            , nixos-anywhere, ... }@inputs: {
+            , nixos-anywhere, ... }@inputs: let
+    allSystems = nixpkgs.lib.systems.flakeExposed;
+    forSystems = systems: f: nixpkgs.lib.genAttrs systems (system: f system);       
+  in {
+
+    devShells = forSystems allSystems (system: let
+      pkgs = nixpkgs.legacyPackages.${system};
+    in {
+      default = pkgs.mkShell {
+        nativeBuildInputs = with pkgs; [
+          nil # lsp language server for nix
+          nixpkgs-fmt
+          nix-output-monitor
+          nixos-anywhere.packages.${system}.default
+        ];
+      };
+    });
 
     nixosConfigurations = let
 
