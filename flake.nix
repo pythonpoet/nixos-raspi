@@ -200,8 +200,9 @@
             # SD-Card image
             # sd-image-kernelboot
             disko.nixosModules.disko
-            ./disko-nvme-zfs.nix
-            { networking.hostId = "8821e309"; } # for zfs
+            ./disko-usb-btrfs.nix
+            # ./disko-nvme-zfs.nix
+            # { networking.hostId = "8821e309"; } # for zfs
 
             ./modules/nice-looking-console.nix
           ];
