@@ -128,7 +128,7 @@
             raspberry-pi-02.base
             usb-gadget-ethernet
             # SD-Card image
-            sd-image-uboot
+            # sd-image-uboot
             # config.txt example
             ./pi02-configtxt.nix
 
@@ -137,7 +137,25 @@
         })
         installer-config
         common-user-config
-        ({ pkgs, ... }: {
+        ({ config, pkgs, ... }: {
+          fileSystems = {
+            "/boot/firmware" = {
+              device = "/dev/disk/by-label/FIRMWARE";
+              fsType = "vfat";
+              options = [
+                "noatime"
+                "noauto"
+                "x-systemd.automount"
+                "x-systemd.idle-timeout=1min"
+              ];
+            };
+            "/" = {
+              device = "/dev/disk/by-label/NIXOS_SD";
+              fsType = "ext4";
+              options = [ "noatime" ];
+            };
+          };
+
           environment.systemPackages = with pkgs; [
             tree
             raspberrypi-eeprom
