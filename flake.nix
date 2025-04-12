@@ -160,8 +160,6 @@
             tree
             raspberrypi-eeprom
             i2c-tools
-            cowsay
-            neofetch
           ];
         })
       ];
