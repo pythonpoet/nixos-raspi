@@ -90,6 +90,23 @@
         ];
       };
 
+      installer-config = ({ config, pkgs, lib, modulesPath, ... }: {
+        # /installer/sd-card/sd-image-aarch64-installer.nix
+        imports = [
+          (modulesPath + "/profiles/installation-device.nix")
+        ];
+
+        # disable swraid – it breaks the boot on raspberry:
+        # - rootfs image is not initramfs (write error): looks like initrd
+        # - /initrd.image: incomplete write (-28 != 25571065)
+        # with the subsequent boot failure
+        boot.swraid.enable = lib.mkForce false;
+
+        # the installation media is also the installation target,
+        # so we don't want to provide the installation configuration.nix.
+        installer.cloneConfig = false;
+      });
+
       common-user-config = {config, ... }: {
         time.timeZone = "UTC";
         networking.hostName = "rpi${config.boot.loader.raspberryPi.variant}-demo";
@@ -118,6 +135,7 @@
             ./modules/nice-looking-console.nix
           ];
         })
+        installer-config
         common-user-config
         ({ pkgs, ... }: {
           environment.systemPackages = with pkgs; [
@@ -146,6 +164,7 @@
             ./modules/nice-looking-console.nix
           ];
         })
+        installer-config
         common-user-config
         {
           boot.tmp.useTmpfs = true;
@@ -169,6 +188,7 @@
             ./modules/nice-looking-console.nix
           ];
         })
+        installer-config
         common-user-config
         {
           boot.tmp.useTmpfs = true;
