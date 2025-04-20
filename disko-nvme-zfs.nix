@@ -63,12 +63,12 @@ in {
         partitions = {
 
           FIRMWARE = firmwarePartition {
-            # label = "FIRMWARE";
+            label = "FIRMWARE";
             content.mountpoint = "/boot/firmware";
           };
 
           ESP = espPartition {
-            # label = "ESP";
+            label = "ESP";
             content.mountpoint = "/boot";
           };
 
@@ -109,10 +109,9 @@ in {
           canmount = "off";
         };
 
-
-        # mountpoint = "/"; # nixos `fileSystems.<...>` mount point
-        # postCreateHook = "zfs list -t snapshot -H -o name | grep -E '^zroot@blank$' || zfs snapshot zroot@blank";
-
+        postCreateHook = let
+          poolName = "rpool";
+        in "zfs list -t snapshot -H -o name | grep -E '^${poolName}@blank$' || zfs snapshot ${poolName}@blank";
 
         datasets = {
 
@@ -123,12 +122,8 @@ in {
           };
           "local/nix" = {
             type = "zfs_fs";
-            # reserve some room to have because nix store gc
-            # actually requires some space to clean up
-            # https://docs.oracle.com/en/operating-systems/solaris/oracle-solaris/11.4/manage-zfs/setting-reservations-zfs-file-systems.html
             options = {
               reservation = "128M";
-              # https://openzfs.github.io/openzfs-docs/man/master/7/zfsconcepts.7.html#Mount_Points
               mountpoint = "legacy";  # to manage "with traditional tools"
             };
             mountpoint = "/nix";  # nixos configuration mountpoint
@@ -137,7 +132,6 @@ in {
           # _system_ data
           system = {
             type = "zfs_fs";
-            # zfs properties
             options = {
               mountpoint = "none";
             };
@@ -160,7 +154,6 @@ in {
           # _user_ and _user service_ data. safest, long retention policy
           safe = {
             type = "zfs_fs";
-            # https://docs.oracle.com/en/operating-systems/solaris/oracle-solaris/11.4/manage-zfs/copies-property.html
             options = {
               copies = "2";
               mountpoint = "none";

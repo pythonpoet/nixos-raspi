@@ -55,8 +55,57 @@
     });
 
     nixosConfigurations = let
-      common-user-config = {config, ... }: {
-        imports = [ ./modules/nice-looking-console.nix ];
+
+      users-config-stub = {
+        # This is identical to what nixos installer does in
+        # (modulesPash + "profiles/installation-device.nix")
+
+        # Use less privileged nixos user
+        users.users.nixos = {
+          isNormalUser = true;
+          extraGroups = [
+            "wheel"
+            "networkmanager"
+            "video"
+          ];
+          # Allow the graphical user to login without password
+          initialHashedPassword = "";
+        };
+
+        # Allow the user to log in as root without a password.
+        users.users.root.initialHashedPassword = "";
+
+        # Don't require sudo/root to `reboot` or `poweroff`.
+        security.polkit.enable = true;
+
+        # Allow passwordless sudo from nixos user
+        security.sudo = {
+          enable = true;
+          wheelNeedsPassword = false;
+        };
+
+        # Automatically log in at the virtual consoles.
+        services.getty.autologinUser = "nixos";
+
+        # We run sshd by default. Login is only possible after adding a
+        # password via "passwd" or by adding a ssh key to ~/.ssh/authorized_keys.
+        # The latter one is particular useful if keys are manually added to
+        # installation device for head-less systems i.e. arm boards by manually
+        # mounting the storage in a different system.
+        services.openssh = {
+          enable = true;
+          settings.PermitRootLogin = "yes";
+        };
+
+        # allow nix-copy to live system
+        nix.settings.trusted-users = [ "nixos" ];
+      };
+
+      common-user-config = {config, pkgs, ... }: {
+        imports = [
+          ./modules/nice-looking-console.nix
+          users-config-stub
+        ];
 
         time.timeZone = "UTC";
         networking.hostName = "rpi${config.boot.loader.raspberryPi.variant}-demo";
@@ -68,6 +117,21 @@
             ENV{ID_PART_ENTRY_FLAGS}=="0x1", \
             ENV{UDISKS_IGNORE}="1"
         '';
+
+        environment.systemPackages = with pkgs; [
+          tree
+        ];
+
+
+        users.users.nixos.openssh.authorizedKeys.keys = [
+          # YOUR SSH PUB KEY HERE #
+
+        ];
+        users.users.root.openssh.authorizedKeys.keys = [
+          # YOUR SSH PUB KEY HERE #
+          
+        ];
+
 
         system.nixos.tags = let
           cfg = config.boot.loader.raspberryPi;
@@ -120,7 +184,6 @@
           common-user-config
           ({ config, pkgs, ... }: {
             environment.systemPackages = with pkgs; [
-              tree
               i2c-tools
             ];
           })
@@ -161,8 +224,10 @@
           })
           # Disk configuration
           disko.nixosModules.disko
+          # WARNING: formatting disk with disko is DESTRUCTIVE, check if
+          # disko.devices.disk.nvme0.device is set correctly!
           ./disko-nvme-zfs.nix
-          { networking.hostId = "8821e309"; } # for zfs
+          { networking.hostId = "8821e309"; } # NOTE: for zfs, must be unique
           # Further user configuration
           common-user-config
           {
