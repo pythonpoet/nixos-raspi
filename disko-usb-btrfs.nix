@@ -70,12 +70,12 @@ in {
       partitions = {
 
         FIRMWARE = firmwarePartition {
-          # label = "FIRMWARE";
+          label = "FIRMWARE";
           content.mountpoint = "/boot/firmware";
         };
 
         ESP = espPartition {
-          # label = "ESP";
+          label = "ESP";
           content.mountpoint = "/boot";
         };
 
