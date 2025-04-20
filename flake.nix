@@ -203,6 +203,8 @@
           })
           # Disk configuration
           disko.nixosModules.disko
+          # WARNING: formatting disk with disko is DESTRUCTIVE, check if
+          # `disko.devices.disk.main.device` is set correctly!
           ./disko-usb-btrfs.nix
           # Further user configuration
           common-user-config
@@ -225,7 +227,7 @@
           # Disk configuration
           disko.nixosModules.disko
           # WARNING: formatting disk with disko is DESTRUCTIVE, check if
-          # disko.devices.disk.nvme0.device is set correctly!
+          # `disko.devices.disk.nvme0.device` is set correctly!
           ./disko-nvme-zfs.nix
           { networking.hostId = "8821e309"; } # NOTE: for zfs, must be unique
           # Further user configuration
