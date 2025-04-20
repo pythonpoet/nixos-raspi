@@ -23,9 +23,10 @@
     };
 
     disko = {
-      # url = "github:nix-community/disko";
+      # the fork is needed for partition attributes support
       url = "github:nvmd/disko/gpt-attrs";
-      inputs.nixpkgs.follows = "nixpkgs";
+      # url = "github:nix-community/disko";
+      inputs.nixpkgs.follows = "nixos-raspberrypi/nixpkgs";
     };
 
     nixos-anywhere = {
