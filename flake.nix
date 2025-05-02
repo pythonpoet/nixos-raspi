@@ -56,7 +56,7 @@
 
     nixosConfigurations = let
 
-      users-config-stub = {
+      users-config-stub = ({ config, ... }: {
         # This is identical to what nixos installer does in
         # (modulesPash + "profiles/installation-device.nix")
 
@@ -99,6 +99,10 @@
 
         # allow nix-copy to live system
         nix.settings.trusted-users = [ "nixos" ];
+
+        # We are stateless, so just default to latest.
+        system.stateVersion = config.system.nixos.release;
+      });
       };
 
       common-user-config = {config, pkgs, ... }: {
