@@ -224,6 +224,7 @@
           # Further user configuration
           common-user-config
           ({ config, pkgs, ... }: {
+            hardware.i2c.enable = true;
             environment.systemPackages = with pkgs; [
               i2c-tools
             ];
