@@ -63,7 +63,12 @@
       fsType = "vfat";
       options = [ "fmask=0077" "dmask=0077" ];
     };
-
+  fileSystems."/nix" = {
+     device = "/dev/disk/by-label/nix-store";
+     fsType = "ext4";
+     neededForBoot = true;
+     options = [ "noatime" ];
+   };
   # swapDevices =
   #   [ { device = "/dev/disk/by-uuid/81c8115f-7268-4560-8fa8-2df6f51a9f12"; }
   #   ];
