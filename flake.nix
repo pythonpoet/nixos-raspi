@@ -154,7 +154,7 @@
         ];
 
 
-        users.users.nixos.openssh.authorizedKeys.keys = [
+        users.users.david.openssh.authorizedKeys.keys = [
          "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAOr7hdJO0P2TBs5GH+XmOi7XoBT6LiAS7Ym6IEgM2H0 david@alpakapro"
 
         ];
