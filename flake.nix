@@ -139,7 +139,7 @@
         ];
 
         time.timeZone = "UTC";
-        networking.hostName = "rpi${config.boot.loader.raspberryPi.variant}-demo";
+        networking.hostName = "alpakapi${config.boot.loader.raspberryPi.variant}";
 
         services.udev.extraRules = ''
           # Ignore partitions with "Required Partition" GPT partition attribute
