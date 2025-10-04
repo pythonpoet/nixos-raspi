@@ -205,8 +205,11 @@
           in {
             boot = {
               loader.raspberryPi.firmwarePackage = kernelBundle.raspberrypifw;
-              loader.raspberryPi.bootloader = "kernel";
+              loader.systemd-boot.enable = true;
+              loader.efi.canTouchEfiVariables = true;
+              loader.raspberryPi.enable = false;
               kernelPackages = kernelBundle.linuxPackages_rpi5;
+              kernelParams = [ "noswap" ];
             };
 
             nixpkgs.overlays = lib.mkAfter [
