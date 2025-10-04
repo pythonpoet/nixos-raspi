@@ -86,7 +86,10 @@
         };
 
         # allow nix-copy to live system
-        nix.settings.trusted-users = [ "david" ];
+        nix.settings= {
+          trusted-users = [ "david" ];
+          experimental-features = ["nix-command" "flakes"];
+        };
 
         # We are stateless, so just default to latest.
         system.stateVersion = config.system.nixos.release;
@@ -151,6 +154,8 @@
 
         environment.systemPackages = with pkgs; [
           tree
+          git
+          helix
         ];
 
 
