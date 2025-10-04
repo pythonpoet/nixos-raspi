@@ -139,7 +139,7 @@
         ];
 
         time.timeZone = "UTC";
-        networking.hostName = "alpakapi${config.boot.loader.raspberryPi.variant}";
+        networking.hostName = "bernina";
 
         services.udev.extraRules = ''
           # Ignore partitions with "Required Partition" GPT partition attribute
@@ -175,7 +175,7 @@
     in {
       
 
-      rpi5 = nixos-raspberrypi.lib.nixosSystemFull {
+      bernina = nixos-raspberrypi.lib.nixosSystemFull {
         specialArgs = inputs;
         modules = [
           ({ config, pkgs, lib, nixos-raspberrypi, disko, ... }: {
