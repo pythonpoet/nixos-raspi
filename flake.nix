@@ -22,11 +22,6 @@
       url = "github:nvmd/nixos-raspberrypi/main";
     };
 
-    disko = {
-      url = "github:nix-community/disko";
-      inputs.nixpkgs.follows = "nixos-raspberrypi/nixpkgs";
-    };
-
     nixos-anywhere = {
       url = "github:nix-community/nixos-anywhere";
     };
@@ -59,19 +54,14 @@
         # (modulesPash + "profiles/installation-device.nix")
 
         # Use less privileged nixos user
-        users.users.nixos = {
+        users.users.david = {
           isNormalUser = true;
           extraGroups = [
             "wheel"
             "networkmanager"
             "video"
           ];
-          # Allow the graphical user to login without password
-          initialHashedPassword = "";
         };
-
-        # Allow the user to log in as root without a password.
-        users.users.root.initialHashedPassword = "";
 
         # Don't require sudo/root to `reboot` or `poweroff`.
         security.polkit.enable = true;
@@ -83,7 +73,7 @@
         };
 
         # Automatically log in at the virtual consoles.
-        services.getty.autologinUser = "nixos";
+        services.getty.autologinUser = "david";
 
         # We run sshd by default. Login is only possible after adding a
         # password via "passwd" or by adding a ssh key to ~/.ssh/authorized_keys.
@@ -96,7 +86,7 @@
         };
 
         # allow nix-copy to live system
-        nix.settings.trusted-users = [ "nixos" ];
+        nix.settings.trusted-users = [ "david" ];
 
         # We are stateless, so just default to latest.
         system.stateVersion = config.system.nixos.release;
@@ -105,6 +95,8 @@
       network-config = {
         # This is mostly portions of safe network configuration defaults that
         # nixos-images and srvos provide
+
+        services.tailscale.enable = true;
 
         networking.useNetworkd = true;
         # mdns
@@ -181,78 +173,7 @@
         ];
       };
     in {
-
-      rpi02 = nixos-raspberrypi.lib.nixosSystemFull {
-        specialArgs = inputs;
-        modules = [
-          ({ config, pkgs, lib, nixos-raspberrypi, ... }: {
-            imports = with nixos-raspberrypi.nixosModules; [
-              # Hardware configuration
-              raspberry-pi-02.base
-              usb-gadget-ethernet
-              # config.txt example
-              ./pi02-configtxt.nix
-            ];
-          })
-          # Disk configuration
-          # Assumes the system will continue to reside on the installation media (sd-card),
-          # as there're hardly other feasible options on RPi02.
-          # (see also https://github.com/nvmd/nixos-raspberrypi/issues/8#issuecomment-2804912881)
-          # `sd-image` has lots of dependencies unnecessary for the installed system,
-          # replicating its disk layout
-          ({ config, pkgs, ... }: {
-            fileSystems = {
-              "/boot/firmware" = {
-                device = "/dev/disk/by-label/FIRMWARE";
-                fsType = "vfat";
-                options = [
-                  "noatime"
-                  "noauto"
-                  "x-systemd.automount"
-                  "x-systemd.idle-timeout=1min"
-                ];
-              };
-              "/" = {
-                device = "/dev/disk/by-label/NIXOS_SD";
-                fsType = "ext4";
-                options = [ "noatime" ];
-              };
-            };
-          })
-          # Further user configuration
-          common-user-config
-          ({ config, pkgs, ... }: {
-            hardware.i2c.enable = true;
-            environment.systemPackages = with pkgs; [
-              i2c-tools
-            ];
-          })
-        ];
-      };
-
-      rpi4 = nixos-raspberrypi.lib.nixosSystem {
-        specialArgs = inputs;
-        modules = [
-          ({ config, pkgs, lib, nixos-raspberrypi, disko, ... }: {
-            imports = with nixos-raspberrypi.nixosModules; [
-              # Hardware configuration
-              raspberry-pi-4.base
-              raspberry-pi-4.display-vc4
-              raspberry-pi-4.bluetooth
-            ];
-          })
-          # Disk configuration
-          disko.nixosModules.disko
-          # WARNING: formatting disk with disko is DESTRUCTIVE, check if
-          # `disko.devices.disk.main.device` is set correctly!
-          ./disko-usb-btrfs.nix
-          # Further user configuration
-          common-user-config
-          {
-            boot.tmp.useTmpfs = true;
-          }
-        ];
-      };
+      
 
       rpi5 = nixos-raspberrypi.lib.nixosSystemFull {
         specialArgs = inputs;
@@ -266,12 +187,7 @@
               ./pi5-configtxt.nix
             ];
           })
-          # Disk configuration
-          disko.nixosModules.disko
-          # WARNING: formatting disk with disko is DESTRUCTIVE, check if
-          # `disko.devices.disk.nvme0.device` is set correctly!
-          ./disko-nvme-zfs.nix
-          { networking.hostId = "8821e309"; } # NOTE: for zfs, must be unique
+          
           # Further user configuration
           common-user-config
           {
