@@ -207,7 +207,7 @@
               loader.raspberryPi.firmwarePackage = kernelBundle.raspberrypifw;
               loader.systemd-boot.enable = true;
               loader.efi.canTouchEfiVariables = true;
-              loader.raspberryPi.enable = false;
+              loader.raspberryPi.enable = lib.mkForce false;
               kernelPackages = kernelBundle.linuxPackages_rpi5;
               kernelParams = [ "noswap" ];
             };
